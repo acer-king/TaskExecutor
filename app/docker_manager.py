@@ -2,16 +2,12 @@ from fastapi import HTTPException
 import aiodocker
 from app import util
 from app.schemas import Resources
-import logging
-from app.config import settings
 
 
 class DockerManager:
     def __init__(self):
         self.client = aiodocker.Docker()
         self.volume_name = util.get_random_hash_str()
-        self.sudo_pwd = settings.sudo_pwd
-        self.volume_image_path = f'/home/Documents/{self.volume_name}.img'
 
     async def docker_volume_create(self, storage_size):
         try:
@@ -28,21 +24,30 @@ class DockerManager:
             raise HTTPException(status_code=400, detail=f"Error creating volume: {e}")
 
     async def volume_delete(self):
-        await util.run_sudo_subprocess(["docker", "volume", "rm", self.volume_name], self.sudo_pwd)
+        await util.run_subprocess(f"docker volume rm {self.volume_name}")
 
     def handle_volume(func):
+        """
+        decorator that handle volume of docker container.
+        create the volume before creating the container and delete the volume after execution of
+        container
+        :return:
+        """
+
         async def wrapper(self, code: str, resources: Resources):
             await self.docker_volume_create(resources.storage[:-1])
             result = await func(self, code, resources)
             await self.volume_delete()
+            return result
+
         return wrapper
 
     @handle_volume
     async def run_container(self, code: str, resources: Resources) -> str:
         """
-        create docker container and execute python code inside it with resources.
-        :param code:  python code.
-        :param resources: resources such as cpu, gpu, ram, storage
+        execution python code inside docker container using resources.
+        :param code: python code
+        :param resources: python resources
         :return:
         """
         config = {
@@ -64,11 +69,11 @@ class DockerManager:
             }
         }
 
-        logging.info("creating the docker container with name of random str")
         container_name = util.get_random_hash_str()
         container = await self.client.containers.create_or_replace(
             name=str(container_name).lower(), config=config
         )
+
         await container.start()
         await container.wait()
 
