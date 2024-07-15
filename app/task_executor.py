@@ -1,13 +1,16 @@
 import asyncio
+from typing import Annotated
+
 from app.config import settings
 from app.schemas import TaskRequest
 from app.docker_manager import DockerManager
 from fastapi import HTTPException
+from fastapi import Depends
 
 
 class TaskExecutor:
-    def __init__(self):
-        self.docker_manager = DockerManager()
+    def __init__(self, docker_manager: Annotated[DockerManager, Depends(DockerManager)]):
+        self.docker_manager = docker_manager
 
     async def execute(self, task: TaskRequest) -> str:
         """

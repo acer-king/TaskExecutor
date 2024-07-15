@@ -1,4 +1,5 @@
 from app.task_executor import TaskExecutor
+from app.docker_manager import DockerManager
 
 
 async def get_task_executor():
@@ -6,5 +7,6 @@ async def get_task_executor():
     return instance of TaskExecutor
     :return:
     """
-    task_executor = TaskExecutor()
+    docker_mgr = DockerManager()
+    task_executor = TaskExecutor(docker_mgr)
     return task_executor
