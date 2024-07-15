@@ -9,7 +9,7 @@ This project can be used to build services that provides computing resources suc
 - Docker
 - Python 3.9+
 
-### Installation
+### Installation and Runing Application
 
 1. Clone the repository:
    ```bash
@@ -21,3 +21,19 @@ This project can be used to build services that provides computing resources suc
 3. Run fastapi applicatoin:
    ```bash
    uvicorn app.main:app --reload
+
+### Project description
+
+- In first step, based on request_body, first create volume with storage.
+- In second, create docker container with given resources such as cpu, gpu, ram.
+- In third, stop the docker container and collects logs using stdin, stdout to return result.
+- In fourth, delete the volume created before and return result
+
+### Challenges
+
+- aiodocker volume delete function was not working somehow, so I used async subprocess to delete the docker volume using command line.
+- aiodocker doesn't pull image from internet. so I solved this problem by calling subprocess on startup application to download python docker image to local.
+- for validation of input request, i used regex and pydantic.
+- I used dependency injection for using services.
+
+   
