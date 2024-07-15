@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 import aiodocker
 from app import util
-from app.schemas import Resources
+from app.models.schemas import Resources
+from app.config import settings
 
 
 class DockerManager:
@@ -51,7 +52,7 @@ class DockerManager:
         :return:
         """
         config = {
-            'Image': 'python:3.9-slim',
+            'Image': settings.default_docker_img,
             'Cmd': ['python', '-c', code],
             'HostConfig': {
                 'NanoCPUs': int(resources.cpu) * 1000000000,

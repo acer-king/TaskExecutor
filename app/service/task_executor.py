@@ -1,11 +1,12 @@
 import asyncio
 from typing import Annotated
 
-from app.config import settings
-from app.schemas import TaskRequest
-from app.docker_manager import DockerManager
 from fastapi import HTTPException
 from fastapi import Depends
+
+from app.config import settings
+from app.models.schemas import TaskRequest
+from app.service.docker_manager import DockerManager
 
 
 class TaskExecutor:

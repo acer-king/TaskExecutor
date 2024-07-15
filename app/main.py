@@ -1,13 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends
-from typing_extensions import Annotated
-
-from app.schemas import TaskRequest, TaskResponse
-from app.task_executor import TaskExecutor
-from app.dependency import get_task_executor
+from fastapi import FastAPI, HTTPException
 
 import aiodocker
 import subprocess
 import logging
+
+from app.config import settings
+from app.api.endpoints import task_handler
 
 app = FastAPI()
 
@@ -19,17 +17,14 @@ async def startup_event():
     try:
         docker = aiodocker.Docker()
         for image in (await docker.images.list()):
-            if "python:3.9-slim" in image["RepoTags"]:
+            if settings.default_docker_img in image["RepoTags"]:
                 logging.info("python image does exist")
                 return
         logging.info("pulling docker image python:3.9-slim from dockerhub")
-        subprocess.run(["docker", "image", "pull", "python:3.9-slim"], check=True)
+        subprocess.run(["docker", "image", "pull", settings.default_docker_img], check=True)
     except Exception as e:
         logging.error(f"Error on Pulling docker image: {e}")
         raise HTTPException(status_code=500, detail="Error running external script")
 
 
-@app.post("/execute_task", response_model=TaskResponse)
-async def execute_task(task: TaskRequest, task_executor: Annotated[TaskExecutor, Depends(get_task_executor)]):
-    result = await task_executor.execute(task)
-    return TaskResponse(status="success", output=result)
+app.include_router(task_handler.router, tags=["task_handler"])

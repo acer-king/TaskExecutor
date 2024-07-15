@@ -12,6 +12,7 @@ class Settings:
     default_ram: str = os.getenv("DEFAULT_RAM")
     default_storage: str = os.getenv("DEFAULT_STORAGE")
     default_time_out: int = int(os.getenv("TIME_OUT"))
+    default_docker_img: str = os.getenv("DOCKER_IMG")
 
     class Config:
         env_file = ".env"
