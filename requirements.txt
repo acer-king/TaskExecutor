@@ -1,0 +1,5 @@
+fastapi
+pydantic
+aiodocker
+uvicorn
+python-dotenv
