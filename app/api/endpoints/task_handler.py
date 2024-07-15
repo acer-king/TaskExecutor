@@ -3,7 +3,7 @@ from typing_extensions import Annotated
 
 from app.models.schemas import TaskRequest, TaskResponse
 from app.service.task_executor import TaskExecutor
-from app.api.dependency import get_task_executor
+from app.api.deps import get_task_executor
 
 router = APIRouter()
 
